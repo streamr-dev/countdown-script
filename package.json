@@ -1,0 +1,17 @@
+{
+  "name": "countdown-script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "countdown.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^8.0.0",
+    "dotenv": "^10.0.0",
+    "pretty-ms": "^7.0.1",
+    "streamr-client": "^5.4.4"
+  }
+}
