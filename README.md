@@ -1,6 +1,6 @@
-### Countdown script
+## Countdown script
 
-## Install and run
+### Install and run
 
 ```
 npm ci
