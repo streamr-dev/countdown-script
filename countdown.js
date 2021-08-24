@@ -9,8 +9,8 @@ program
     .version(CURRENT_VERSION)
     .option('--streamId <streamId>', 'streamId to publish', 'streamr.eth/brubeck-testnet/rewards')
     .option('--eventName <eventName>', 'Which event the script is counting down to', 'BRUBECK TESTNET 1 LAUNCH')
-    .option('--preEventMessage <preEventMessage>', 'Additional message before event has started', 'If you can see this message, your node is subscribed to the rewards stream. You may see some reward codes being claimed already before the testnet launches. They are only there for testing and have no value.')
-    .option('--postEventMessage <postEventMessage>', 'Additional message once event has started', 'You should start receiving reward codes within the next 10 minutes')
+    .option('--preEventMessage <preEventMessage>', 'Additional message before event has started', 'If you see this message, your node has successfully subscribed to the rewards stream. You may see some reward codes being claimed already before the testnet launches. They are only there for testing and have no value.')
+    .option('--postEventMessage <postEventMessage>', 'Additional message once event has started', 'Network incentives are now active, and your node should start claiming the first rewards within 10 minutes.')
     .option('--eventMessageCount <eventMessageCount>', 'Number of times to send the message after the event has started', '1')
     .option('--notificationInterval <notificationInterval>', 'interval to publish notifications in ms', '60000')
     .option('--eventTime <eventTime>', 'Timestamp to countdown to as Unix timestamp', '1630411200')
@@ -29,6 +29,7 @@ const ethereumKey = process.env.ETHEREUM_PRIVATE_KEY || StreamrClient.generateEt
 
 const prettyMillisecondsOptions = {
     secondsDecimalDigits: 0,
+    unitCount: 3,
 }
 
 const start = () => {
@@ -46,7 +47,7 @@ const start = () => {
 
         const msg = {}
         if (timeToEvent <= 0) {
-            msg['info'] = `${eventName} has started on ${new Date(eventTime).toUTCString()}! ${postEventMessage}!`
+            msg['info'] = `${eventName} has started! ${postEventMessage}!`
             eventMessageCounter += 1
         } else {
             msg['info'] = `${eventName} in ${prettyMilliseconds(timeToEvent, prettyMillisecondsOptions)}! ${preEventMessage}`
