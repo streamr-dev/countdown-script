@@ -53,6 +53,7 @@ const start = () => {
             msg['info'] = `${eventName} in ${prettyMilliseconds(timeToEvent, prettyMillisecondsOptions)}! ${preEventMessage}`
         }
         console.log(msg)
+        await client.connect()
         await client.publish(streamId, msg)
 
         if (eventMessageCount < eventMessageCounter) {
