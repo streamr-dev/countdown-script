@@ -3,6 +3,7 @@ const StreamrClient = require('streamr-client')
 const program = require('commander')
 const prettyMilliseconds = require('pretty-ms');
 const { version: CURRENT_VERSION } = require('./package.json')
+const { SlackBot } = require('@streamr/slackbot')
 
 program
     .version(CURRENT_VERSION)
@@ -25,7 +26,7 @@ let eventMessageCounter = 0
 const notificationInterval = parseInt(program.opts().notificationInterval, 10)
 const eventTime = parseInt(program.opts().eventTime, 10) * 1000
 const ethereumKey = process.env.ETHEREUM_PRIVATE_KEY || StreamrClient.generateEthereumAccount().privateKey
-
+const slackbot = new SlackBot("#testnet-log", process.env.SLACKBOT_TOKEN)
 const prettyMillisecondsOptions = {
     secondsDecimalDigits: 0,
     unitCount: 3,
@@ -41,6 +42,7 @@ const start = () => {
         restUrl: process.env.STREAMR_CLIENT_REST_URL
     })
 
+    const consecutiveFailures = {}
     const publishIntervalRef = setInterval(async () => {
         let timeToEvent = eventTime - Date.now()
 
@@ -53,16 +55,34 @@ const start = () => {
         }
         console.log(msg)
         await client.connect()
+        const failedPublishes = []
         const promises = streamIds.map(async (streamId) => {
-            await client.publish(streamId, msg)
+            try {
+                await client.publish(streamId, msg)
+                if (consecutiveFailures[streamId]) {
+                    delete consecutiveFailures[streamId]
+                    slackbot.notify([`Publishing to ${streamId} recovered`], "Countdown Script")
+                }
+            } catch (err) {
+                if (!consecutiveFailures[streamId]) {
+                    consecutiveFailures[streamId] = 1
+                    failedPublishes.push(err)
+                } else {
+                    consecutiveFailures[streamId] += 1
+                }
+                console.error(`${consecutiveFailures[streamId]} consecutive errors for stream ${streamId}`)
+            }
         })
         await Promise.all(promises)
+        if (failedPublishes.length > 0) {
+            slackbot.alert(failedPublishes, "Countdown Script")
+        }
 
         if (eventMessageCount < eventMessageCounter) {
             clearInterval(publishIntervalRef)
             await client.disconnect()
         }
-    }, notificationInterval)
+    }, 2000)
 }
 
 start()

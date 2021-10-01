@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@streamr/slackbot": "^1.0.0",
     "commander": "^8.0.0",
     "dotenv": "^10.0.0",
     "pretty-ms": "^7.0.1",
